@@ -1,9 +1,10 @@
+using k8s;
 using Lamar;
-using Legate.Workers;
+using Legate.Core.Factories;
+using Legate.Core.State;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 namespace Legate
@@ -19,12 +20,15 @@ namespace Legate
 
         public void ConfigureContainer(ServiceRegistry services)
         {
-            services.AddHostedService<LegateWorker>();
+            services.For<IKubernetes>().Use(context => context.GetInstance<IKubernetesFactory>().CreateClient());
 
-            services.Scan(s =>
+            services.For<IPodsEventStream>().Use<PodsEventStream>().Singleton();
+
+            services.Scan(scanner =>
             {
-                s.TheCallingAssembly();
-                s.WithDefaultConventions();
+                scanner.TheCallingAssembly();
+                scanner.WithDefaultConventions();
+                scanner.AddAllTypesOf<IHostedService>();
             });
         }
 
