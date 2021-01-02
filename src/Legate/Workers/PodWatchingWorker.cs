@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using k8s;
 using k8s.Models;
+using Legate.Core;
 using Legate.Core.Models;
 using Legate.Core.State;
 using Microsoft.Extensions.Hosting;
@@ -10,7 +11,7 @@ using NLog;
 
 namespace Legate.Workers
 {
-    public class PodWatchingWorker : BackgroundService
+    public class PodWatchingWorker : BackgroundService, IWorker
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -57,7 +58,12 @@ namespace Legate.Workers
         {
             var completionSource = new TaskCompletionSource();
 
-            var namespaceWatchResponse = await _client.ListPodForAllNamespacesWithHttpMessagesAsync(watch: true, cancellationToken: cancellationToken);
+            // TODO Are label selectors case-sensitive?
+            var namespaceWatchResponse = await _client.ListPodForAllNamespacesWithHttpMessagesAsync(
+                watch: true,
+                cancellationToken: cancellationToken,
+                labelSelector: $"{KubernetesConstants.TrackedLabel}=true"
+            );
             try
             {
                 using var watcher = namespaceWatchResponse.Watch<V1Pod, V1PodList>(

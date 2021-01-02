@@ -1,18 +1,15 @@
-﻿namespace Legate.Core.Models
+﻿using System.Collections.Generic;
+
+namespace Legate.Core.Models
 {
-    public class Pod
-    {
-        public string Namespace { get; set; }
+    public record Pod(string Uid,
+                      string Namespace,
+                      string Name,
+                      string Host,
+                      string PodAddress,
+                      IReadOnlyCollection<PodPort> PodPorts,
+                      IReadOnlyDictionary<string, string> PodLabels,
+                      IReadOnlyDictionary<string, string> PodAnnotations);
 
-        public string Name { get; set; }
-
-        public string Host { get; set; }
-
-        public Pod(string ns, string name, string host)
-        {
-            Namespace = ns;
-            Name = name;
-            Host = host;
-        }
-    }
+    public record PodPort(string ContainerName, string? Name, int Port);
 }

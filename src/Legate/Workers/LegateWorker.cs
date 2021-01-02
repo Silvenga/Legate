@@ -5,7 +5,7 @@ using NLog;
 
 namespace Legate.Workers
 {
-    public class LegateWorker : BackgroundService
+    public class LegateWorker : BackgroundService, IWorker
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
