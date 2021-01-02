@@ -7,6 +7,7 @@ namespace Legate.Core.Models
                       string Name,
                       string Host,
                       string PodAddress,
+                      bool Ready,
                       IReadOnlyCollection<PodPort> PodPorts,
                       IReadOnlyDictionary<string, string> PodLabels,
                       IReadOnlyDictionary<string, string> PodAnnotations);

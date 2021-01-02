@@ -10,7 +10,6 @@ using Legate.Core.Models;
 using Legate.Core.State;
 using Microsoft.Extensions.Hosting;
 using NLog;
-using Org.BouncyCastle.Asn1;
 
 namespace Legate.Workers
 {
@@ -35,19 +34,23 @@ namespace Legate.Workers
             await foreach (var (updateType, data) in _podsEventStream.ReadEventsAsync(cancellationToken))
             {
                 var pod = GetPod(data);
-                switch (updateType)
+
+                Logger.Debug($"Processing update for pod '{pod.Namespace}/{pod.Name}' (Ready: {pod.Ready}).");
+
+                if (updateType == WatchEventType.Added || updateType == WatchEventType.Modified && pod.Ready)
                 {
-                    case WatchEventType.Added:
-                    case WatchEventType.Modified:
-                        var services = GetPodServices(pod);
-                        await _podServicesContainer.UpsertPodServicesAsync(pod, services, cancellationToken);
-                        break;
-                    case WatchEventType.Deleted:
-                    case WatchEventType.Error:
-                        await _podServicesContainer.RemovePodServicesAsync(pod, cancellationToken);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
+                    var services = GetPodServices(pod);
+                    await _podServicesContainer.UpsertPodServicesAsync(pod, services, cancellationToken);
+                    Logger.Info($"Pod '{pod.Namespace}/{pod.Name}' is ready, adding services.");
+                }
+                else if (updateType == WatchEventType.Deleted || updateType == WatchEventType.Error || !pod.Ready)
+                {
+                    await _podServicesContainer.RemovePodServicesAsync(pod, cancellationToken);
+                    Logger.Info($"Pod '{pod.Namespace}/{pod.Name}' is not ready or is being deleted.");
+                }
+                else
+                {
+                    throw new ArgumentOutOfRangeException();
                 }
             }
         }
@@ -57,6 +60,11 @@ namespace Legate.Workers
             var podNamespace = string.IsNullOrWhiteSpace(data.Metadata.NamespaceProperty)
                 ? "default"
                 : data.Metadata.NamespaceProperty;
+
+            var ready = data.Status.Conditions?.Any(x =>
+                string.Equals(x.Type, "Ready", StringComparison.OrdinalIgnoreCase)
+                && x.Status.Equals(true.ToString(), StringComparison.OrdinalIgnoreCase)
+            ) ?? false;
 
             var podPorts = data.Spec.Containers
                                .SelectMany(x => x.Ports.Select(c => new
@@ -73,6 +81,7 @@ namespace Legate.Workers
                 data.Metadata.Name,
                 data.Spec.NodeName,
                 data.Status.PodIP,
+                ready,
                 podPorts,
                 new Dictionary<string, string>(data.Metadata.Labels ?? new Dictionary<string, string>()),
                 new Dictionary<string, string>(data.Metadata.Annotations ?? new Dictionary<string, string>())
