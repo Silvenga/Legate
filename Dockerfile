@@ -7,17 +7,20 @@ RUN set -xe \
     && dotnet restore
 
 FROM restore AS build
+ARG BUILD_VERSION=0.0.1
 COPY . /source/
 RUN set -xe \
-    && dotnet build -c release
+    && dotnet build -c release -p:Version=${BUILD_VERSION}
 
 FROM build AS test
+ARG BUILD_VERSION=0.0.1
 RUN set -xe \
-    && dotnet test -c release
+    && dotnet test -c release -p:Version=${BUILD_VERSION}
 
 FROM build AS publish
+ARG BUILD_VERSION=0.0.1
 RUN set -xe \
-    && dotnet publish /source/src/Legate/Legate.csproj -c release -o /app
+    && dotnet publish /source/src/Legate/Legate.csproj -c release -o /app -p:Version=${BUILD_VERSION}
 
 FROM mcr.microsoft.com/dotnet/aspnet:5.0 AS runtime
 WORKDIR /app
