@@ -1,28 +1,30 @@
 using System;
 using System.Reflection;
+using System.Threading.Tasks;
 using Lamar.Microsoft.DependencyInjection;
 using Legate.Core;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NLog;
-using NLog.Web;
 
 namespace Legate
 {
     public static class Program
     {
-        public static void Main(string[] args)
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
+        public static async Task Main(string[] args)
         {
-            // ReSharper disable once StringLiteralTypo
-            var logger = NLogBuilder.ConfigureNLog("nlog.config").GetCurrentClassLogger();
+            Logging.Configure();
             try
             {
-                Start(args, logger);
+                await RunAsync(args);
+                Logger.Info("Graceful exit.");
             }
             catch (Exception e)
             {
-                logger.Error(e, "An unhandled exception occured.");
+                Logger.Error(e, "An unhandled exception occured.");
                 throw;
             }
             finally
@@ -31,18 +33,18 @@ namespace Legate
             }
         }
 
-        private static void Start(string[] args, ILogger logger)
+        private static async Task RunAsync(string[] args)
         {
-            logger.Info(@" _                          _        ");
-            logger.Info(@"| |                        | |       ");
-            logger.Info(@"| |      ___   __ _   __ _ | |_  ___ ");
-            logger.Info(@"| |     / _ \ / _` | / _` || __|/ _ \");
-            logger.Info(@"| |____|  __/| (_| || (_| || |_|  __/");
-            logger.Info(@"\_____/ \___| \__, | \__,_| \__|\___|");
-            logger.Info(@"               __/ |                 ");
-            logger.Info(@"              |___/                  ");
-            logger.Info("");
-            logger.Info($"Legate {Assembly.GetEntryAssembly()?.GetName().Version} has begun.");
+            Logger.Info(@" _                          _        ");
+            Logger.Info(@"| |                        | |       ");
+            Logger.Info(@"| |      ___   __ _   __ _ | |_  ___ ");
+            Logger.Info(@"| |     / _ \ / _` | / _` || __|/ _ \");
+            Logger.Info(@"| |____|  __/| (_| || (_| || |_|  __/");
+            Logger.Info(@"\_____/ \___| \__, | \__,_| \__|\___|");
+            Logger.Info(@"               __/ |                 ");
+            Logger.Info(@"              |___/                  ");
+            Logger.Info("");
+            Logger.Info($"Legate {Assembly.GetEntryAssembly()?.GetName().Version} has begun.");
 
             var host = CreateHostBuilder(args).Build();
             var configuration = host.Services.GetRequiredService<LegateConfiguration>();
@@ -52,24 +54,27 @@ namespace Legate
             {
                 foreach (var result in results)
                 {
-                    logger.Error(result);
+                    Logger.Error(result);
                 }
 
-                logger.Info("Configruations are invalid, will shutdown.");
+                Logger.Info("Configruations are invalid, will shutdown.");
             }
 
-            logger.Info("Startup checks completed, starting API and workers.");
-            host.Start();
+            Logger.Info("Startup checks completed, starting API and workers.");
+
+            await host.RunAsync();
         }
 
-        private static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .UseLamar()
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>();
-                    webBuilder.ConfigureServices(services => { services.AddControllers(); });
-                })
-                .SetupLogging();
+        private static IHostBuilder CreateHostBuilder(string[] args)
+        {
+            return Host.CreateDefaultBuilder(args)
+                       .UseLamar()
+                       .ConfigureWebHostDefaults(webBuilder =>
+                       {
+                           webBuilder.UseStartup<Startup>();
+                           webBuilder.ConfigureServices(services => { services.AddControllers(); });
+                       })
+                       .SetupLogging();
+        }
     }
 }
