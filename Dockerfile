@@ -26,4 +26,5 @@ RUN set -xe \
 FROM mcr.microsoft.com/dotnet/aspnet:5.0 AS runtime
 WORKDIR /app
 COPY --from=publish /app /app
+ENV ASPNETCORE_URLS=http://localhost:25010
 ENTRYPOINT ["dotnet", "Legate.dll"]
