@@ -3,6 +3,7 @@ WORKDIR /source
 COPY Legate.sln /source/Legate.sln
 COPY src/Legate/Legate.csproj /source/src/Legate/Legate.csproj
 COPY tests/Legate.Tests/Legate.Tests.csproj /source/tests/Legate.Tests/Legate.Tests.csproj
+COPY vendor/consuldotnet/Consul/Consul.csproj /source/vendor/consuldotnet/Consul/Consul.csproj
 RUN set -xe \
     && dotnet restore
 
