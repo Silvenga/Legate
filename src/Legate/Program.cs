@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using Lamar.Microsoft.DependencyInjection;
 using Legate.Core;
 using Microsoft.AspNetCore.Hosting;
@@ -32,6 +33,17 @@ namespace Legate
 
         private static void Start(string[] args, ILogger logger)
         {
+            logger.Info(@" _                          _        ");
+            logger.Info(@"| |                        | |       ");
+            logger.Info(@"| |      ___   __ _   __ _ | |_  ___ ");
+            logger.Info(@"| |     / _ \ / _` | / _` || __|/ _ \");
+            logger.Info(@"| |____|  __/| (_| || (_| || |_|  __/");
+            logger.Info(@"\_____/ \___| \__, | \__,_| \__|\___|");
+            logger.Info(@"               __/ |                 ");
+            logger.Info(@"              |___/                  ");
+            logger.Info("");
+            logger.Info($"Legate {Assembly.GetEntryAssembly()?.GetName().Version} has begun.");
+
             var host = CreateHostBuilder(args).Build();
             var configuration = host.Services.GetRequiredService<LegateConfiguration>();
 
@@ -46,6 +58,7 @@ namespace Legate
                 logger.Info("Configruations are invalid, will shutdown.");
             }
 
+            logger.Info("Startup checks completed, starting API and workers.");
             host.Start();
         }
 
