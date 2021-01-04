@@ -45,7 +45,7 @@ namespace Legate.Workers
                 catch (Exception e)
                 {
                     Logger.Warn(e, "An exception occurred while watching for pod changes, will retry.");
-                    await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
+                    await Task.Delay(TimeSpan.FromSeconds(10), cancellationToken);
                 }
             }
         }

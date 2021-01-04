@@ -29,7 +29,7 @@ namespace Legate.Workers
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                var timeout = TimeSpan.FromSeconds(_configuration.ConsulServiceTtlSeconds);
+                var timeout = TimeSpan.FromSeconds(_configuration.ConsulServiceTtlSeconds) / 2;
                 await Task.Delay(timeout, cancellationToken);
 
                 await foreach (var podService in _podServicesContainer.GetServicesAsync(cancellationToken))
