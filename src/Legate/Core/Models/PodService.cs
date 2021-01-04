@@ -2,5 +2,5 @@
 
 namespace Legate.Core.Models
 {
-    public record PodService(string PodUuid, string ServiceId, int Port, IReadOnlyCollection<string> Tags, PodServiceScope Scope);
+    public record PodService(string PodUid, string Name, int Port, IReadOnlyCollection<string> Tags, PodServiceScope Scope);
 }

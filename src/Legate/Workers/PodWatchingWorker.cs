@@ -26,8 +26,6 @@ namespace Legate.Workers
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
-            Logger.Debug("Startig pod watching worker.");
-
             while (!cancellationToken.IsCancellationRequested)
             {
                 try
@@ -50,8 +48,6 @@ namespace Legate.Workers
                     await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
                 }
             }
-
-            Logger.Debug("The pod watching worker is shutting down.");
         }
 
         private async Task Watch(CancellationToken cancellationToken)
