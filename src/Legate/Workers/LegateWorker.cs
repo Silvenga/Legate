@@ -12,8 +12,14 @@ namespace Legate.Workers
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
             Logger.Info("Starting core workers.");
-            await Task.Delay(Timeout.Infinite, cancellationToken);
-            Logger.Info("Shutdown request recieved.");
+            try
+            {
+                await Task.Delay(Timeout.Infinite, cancellationToken);
+            }
+            finally
+            {
+                Logger.Info("Shutdown request recieved.");
+            }
         }
     }
 }
