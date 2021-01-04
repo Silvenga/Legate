@@ -17,9 +17,9 @@ namespace Legate.Core.Clients
 
     public class ConsulServiceClient : IConsulServiceClient
     {
-        private readonly ConsulClient _client;
+        private readonly IConsulClient _client;
 
-        public ConsulServiceClient(ConsulClient client)
+        public ConsulServiceClient(IConsulClient client)
         {
             _client = client;
         }
