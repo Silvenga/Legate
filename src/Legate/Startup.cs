@@ -1,3 +1,4 @@
+using Consul;
 using k8s;
 using Lamar;
 using Legate.Core.Factories;
@@ -21,6 +22,7 @@ namespace Legate
         public void ConfigureContainer(ServiceRegistry services)
         {
             services.For<IKubernetes>().Use(context => context.GetInstance<IKubernetesFactory>().CreateClient());
+            services.For<IConsulClient>().Use(context => context.GetInstance<IConsulServiceClientFactory>().Create());
 
             services.For<IPodsEventStream>().Use<PodsEventStream>().Singleton();
 
