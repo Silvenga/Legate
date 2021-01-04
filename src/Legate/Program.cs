@@ -1,10 +1,10 @@
 using System;
-using JetBrains.Annotations;
 using Lamar.Microsoft.DependencyInjection;
+using Legate.Core;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using NLog;
 using NLog.Web;
 
 namespace Legate
@@ -17,7 +17,7 @@ namespace Legate
             var logger = NLogBuilder.ConfigureNLog("nlog.config").GetCurrentClassLogger();
             try
             {
-                CreateHostBuilder(args).Build().Run();
+                Start(args, logger);
             }
             catch (Exception e)
             {
@@ -26,12 +26,30 @@ namespace Legate
             }
             finally
             {
-                NLog.LogManager.Shutdown();
+                LogManager.Shutdown();
             }
         }
 
-        [UsedImplicitly]
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
+        private static void Start(string[] args, ILogger logger)
+        {
+            var host = CreateHostBuilder(args).Build();
+            var configuration = host.Services.GetRequiredService<LegateConfiguration>();
+
+            var configurationValid = configuration.Validate(out var results);
+            if (!configurationValid)
+            {
+                foreach (var result in results)
+                {
+                    logger.Error(result);
+                }
+
+                logger.Info("Configruations are invalid, will shutdown.");
+            }
+
+            host.Start();
+        }
+
+        private static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
                 .UseLamar()
                 .ConfigureWebHostDefaults(webBuilder =>
@@ -39,11 +57,6 @@ namespace Legate
                     webBuilder.UseStartup<Startup>();
                     webBuilder.ConfigureServices(services => { services.AddControllers(); });
                 })
-                .ConfigureLogging(logging =>
-                {
-                    logging.ClearProviders();
-                    logging.SetMinimumLevel(LogLevel.Trace);
-                })
-                .UseNLog();
+                .SetupLogging();
     }
 }

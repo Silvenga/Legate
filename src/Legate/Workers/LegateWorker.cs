@@ -9,9 +9,11 @@ namespace Legate.Workers
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
             Logger.Info("Starting core workers.");
+            await Task.Delay(Timeout.Infinite, cancellationToken);
+            Logger.Info("Shutdown request recieved.");
         }
     }
 }
