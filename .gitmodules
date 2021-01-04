@@ -1,0 +1,3 @@
+[submodule "vendor/consuldotnet"]
+	path = vendor/consuldotnet
+	url = https://github.com/G-Research/consuldotnet.git
