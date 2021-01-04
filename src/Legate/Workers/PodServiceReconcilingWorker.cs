@@ -45,11 +45,14 @@ namespace Legate.Workers
 
                 Logger.Debug($"Processing update for pod '{pod.Namespace}/{pod.Name}' (Ready: {pod.Ready}).");
 
-                if (updateType == WatchEventType.Added || updateType == WatchEventType.Modified && pod.Ready)
+                if ((updateType == WatchEventType.Added || updateType == WatchEventType.Modified)
+                    && pod.Ready)
                 {
                     await CreateServicesForPod(cancellationToken, pod);
                 }
-                else if (updateType == WatchEventType.Deleted || updateType == WatchEventType.Error || !pod.Ready)
+                else if (updateType == WatchEventType.Deleted
+                         || updateType == WatchEventType.Error
+                         || !pod.Ready)
                 {
                     await RemoveServicesForPod(cancellationToken, pod);
                 }

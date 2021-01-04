@@ -25,6 +25,7 @@ namespace Legate
             services.For<IConsulClient>().Use(context => context.GetInstance<IConsulServiceClientFactory>().Create());
 
             services.For<IPodsEventStream>().Use<PodsEventStream>().Singleton();
+            services.For<IPodServicesContainer>().Use<PodServicesContainer>().Singleton();
 
             services.Scan(scanner =>
             {

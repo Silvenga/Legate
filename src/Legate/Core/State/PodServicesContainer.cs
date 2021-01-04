@@ -4,7 +4,6 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Legate.Core.Models;
-using NLog;
 
 namespace Legate.Core.State
 {
@@ -17,8 +16,6 @@ namespace Legate.Core.State
 
     public class PodServicesContainer : IPodServicesContainer
     {
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-
         private readonly Dictionary<string, IReadOnlyCollection<PodService>> _pods = new();
         private readonly SemaphoreSlim _lock = new(1, 1);
 
